@@ -6,6 +6,7 @@ exports.handler = async function(event) {
     drivers:      'https://api.jolpi.ca/ergast/f1/2026/driverStandings.json?limit=30',
     constructors: 'https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json?limit=20',
     results:      'https://api.jolpi.ca/ergast/f1/2026/results/1.json?limit=100',
+    podios:       'https://api.jolpi.ca/ergast/f1/2026/results.json?limit=300',
     colapinto:    'https://api.jolpi.ca/ergast/f1/2026/drivers/colapinto/results.json?limit=100',
     schedule:     'https://api.jolpi.ca/ergast/f1/2026.json?limit=30',
     grid:         'https://api.jolpi.ca/ergast/f1/2026/last/qualifying.json?limit=30'
