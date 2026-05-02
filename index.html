@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0">
+  <meta name="description" content="Seguí la Fórmula 1 2026: próxima carrera, tabla de puntos, Colapinto y más.">
+  <meta name="theme-color" content="#D0021B">
+  <meta property="og:title" content="F1 2026">
+  <meta property="og:description" content="Todo sobre la temporada de Fórmula 1 2026, fácil de leer.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎</text></svg>">
+  <title>F1 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rojo:        #D0021B;
+      --rojo-suave:  #FFF0F2;
+      --rojo-borde:  #F5C0C8;
+      --azul:        #0047AB;
+      --azul-suave:  #EEF3FF;
+      --azul-borde:  #B8CCEE;
+      --dorado:      #B8860B;
+      --dorado-suave:#FFFBEE;
+      --dorado-borde:#E8D080;
+      --texto:       #1A1A1A;
+      --texto2:      #4A4A4A;
+      --texto3:      #8A8A8A;
+      --borde:       #E8E4DF;
+      --fondo:       #FAFAF8;
+      --fondo-card:  #FFFFFF;
+      --fondo-sec:   #F2EEE9;
+      --sombra-sm:   0 1px 4px rgba(0,0,0,0.07);
+      --sombra-md:   0 4px 16px rgba(0,0,0,0.09);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    html { font-size:19px; }
+    body {
+      background:var(--fondo); color:var(--texto);
+      font-family:'DM Sans',sans-serif; font-size:1rem; line-height:1.55;
+      max-width:520px; margin:0 auto; min-height:100vh;
+    }
+
+    /* HEADER */
+    .hdr {
+      background:linear-gradient(135deg,#D0021B 0%,#A80016 100%);
+      padding:16px 18px 13px;
+      position:sticky; top:0; z-index:100;
+    }
+    .hdr-titulo { font-family:'DM Serif Display',serif; font-size:1.55rem; color:#fff; display:flex; align-items:center; gap:8px; }
+    .hdr-sub { font-size:0.7rem; color:rgba(255,255,255,0.78); margin-top:4px; font-weight:500; display:flex; align-items:center; gap:6px; }
+    .hdr-dot { width:6px; height:6px; border-radius:50%; background:#7FFF7F; flex-shrink:0; box-shadow:0 0 6px #7FFF7F; }
+
+    /* TABS */
+    .tabs {
+      background:var(--fondo-card); border-bottom:2px solid var(--borde);
+      position:sticky; top:66px; z-index:99;
+      display:flex; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    }
+    .tab {
+      flex:1; padding:9px 2px 8px;
+      font-family:'DM Sans',sans-serif; font-size:0.58rem; font-weight:700;
+      color:var(--texto3); cursor:pointer;
+      border-bottom:3px solid transparent;
+      border-right:1px solid var(--borde);
+      min-height:52px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; gap:4px; transition:all .18s ease;
+    }
+    .tab:last-child { border-right:none; }
+    .tab-icono { font-size:1.25rem; line-height:1; }
+    .tab.active { color:var(--rojo); border-bottom-color:var(--rojo); background:linear-gradient(to bottom,var(--rojo-suave),var(--fondo-card)); }
+    .tab.tab-arg.active { color:var(--azul); border-bottom-color:var(--azul); background:linear-gradient(to bottom,var(--azul-suave),var(--fondo-card)); }
+
+    /* SECTIONS */
+    .sec { display:none; padding:14px 13px 88px; }
+    .sec.active { display:block; }
+
+    /* LOADING / ERROR */
+    .loading {
+      padding:40px 20px; text-align:center; color:var(--texto3);
+    }
+    .loading-spin {
+      width:32px; height:32px; border:3px solid var(--borde);
+      border-top-color:var(--rojo); border-radius:50%;
+      animation:spin .8s linear infinite;
+      margin:0 auto 14px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-txt { font-size:0.88rem; font-weight:500; }
+    .error-box {
+      background:var(--rojo-suave); border:1px solid var(--rojo-borde);
+      border-radius:12px; padding:20px 16px; text-align:center; margin:10px 0;
+    }
+    .error-txt { font-size:0.85rem; color:var(--rojo); font-weight:600; margin-bottom:12px; }
+    .retry-btn {
+      background:var(--rojo); color:#fff; border:none;
+      border-radius:8px; padding:10px 20px;
+      font-size:0.85rem; font-weight:700; cursor:pointer;
+      font-family:'DM Sans',sans-serif;
+    }
+
+    /* SEC LABEL */
+    .sec-lbl {
+      font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:1.2px;
+      color:var(--texto3); margin-bottom:11px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .sec-lbl::after { content:''; flex:1; height:1px; background:var(--borde); }
+
+    /* CARD */
+    .card { background:var(--fondo-card); border-radius:16px; border:1px solid var(--borde); box-shadow:var(--sombra-sm); margin-bottom:13px; overflow:hidden; }
+
+    /* HERO */
+    .hero { text-align:center; padding:22px 18px 18px; background:linear-gradient(170deg,#fff 0%,var(--fondo) 100%); }
+    .hero-flag { font-size:3.2rem; margin-bottom:8px; line-height:1; }
+    .hero-nombre { font-family:'DM Serif Display',serif; font-size:1.35rem; color:var(--texto); margin-bottom:4px; line-height:1.2; }
+    .hero-sub { font-size:0.82rem; color:var(--texto3); font-weight:500; margin-bottom:18px; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .info-cell { background:var(--fondo); border-radius:10px; padding:11px 13px; border:1px solid var(--borde); }
+    .info-lbl { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.9px; color:var(--texto3); margin-bottom:4px; }
+    .info-val { font-size:0.85rem; font-weight:600; color:var(--texto); }
+
+    /* CUENTA REGRESIVA */
+    .cd-box {
+      background:linear-gradient(135deg,#D0021B,#A80016);
+      border-radius:12px; padding:14px 12px; text-align:center; margin-top:10px;
+      box-shadow:0 4px 14px rgba(208,2,27,0.25);
+    }
+    .cd-lbl { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.75); margin-bottom:10px; }
+    .cd-tabla { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .cd-celda { background:rgba(255,255,255,0.12); border-radius:10px; padding:10px 6px; }
+    .cd-num { font-family:'DM Serif Display',serif; font-size:2rem; color:#fff; line-height:1; }
+    .cd-unidad { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:rgba(255,255,255,0.65); margin-top:4px; }
+
+    /* HORARIOS */
+    .horario-row { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--borde); min-height:58px; gap:10px; }
+    .horario-row:last-child { border-bottom:none; }
+    .horario-row.principal { background:var(--rojo-suave); border-left:3px solid var(--rojo); }
+    .horario-nombre { font-size:0.95rem; font-weight:600; color:var(--texto); }
+    .horario-row.principal .horario-nombre { color:var(--rojo); font-weight:700; }
+    .horario-cuando { font-size:0.78rem; color:var(--texto3); font-weight:500; margin-top:2px; }
+    .horario-row.principal .horario-cuando { color:var(--rojo); opacity:.8; }
+
+    /* STANDINGS */
+    .std-hdr { display:grid; grid-template-columns:40px 1fr 54px; gap:6px; padding:8px 16px 9px; background:var(--fondo-sec); border-bottom:1px solid var(--borde); }
+    .std-hdr span { font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--texto3); }
+    .std-fila { display:grid; grid-template-columns:40px 1fr 54px; gap:6px; padding:13px 16px; border-bottom:1px solid var(--borde); min-height:62px; align-items:center; }
+    .std-fila:last-child { border-bottom:none; }
+    .std-fila.lider { background:var(--dorado-suave); }
+    .std-pos { font-family:'DM Serif Display',serif; font-size:1.3rem; color:var(--texto3); }
+    .std-fila.lider .std-pos { color:var(--dorado); }
+    .std-centro { display:flex; align-items:center; gap:10px; }
+    .drv-flag { font-size:1.25rem; flex-shrink:0; }
+    .std-nombre { font-size:0.95rem; font-weight:600; color:var(--texto); line-height:1.2; }
+    .std-equipo { font-size:0.7rem; font-weight:500; color:var(--texto3); margin-top:3px; display:flex; align-items:center; gap:5px; }
+    .std-pts { font-family:'DM Serif Display',serif; font-size:1.3rem; color:var(--texto2); text-align:right; }
+    .std-fila.lider .std-pts { color:var(--dorado); }
+    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+    /* COLAPINTO */
+    .col-perfil { display:flex; align-items:center; gap:15px; padding:18px 16px; border-bottom:1px solid var(--borde); background:linear-gradient(135deg,var(--azul-suave),#fff); }
+    .col-avatar { width:68px; height:68px; border-radius:50%; background:var(--azul-suave); border:2px solid var(--azul-borde); display:flex; align-items:center; justify-content:center; font-size:2.1rem; flex-shrink:0; box-shadow:var(--sombra-sm); }
+    .col-nombre { font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--texto); }
+    .col-sub { font-size:0.76rem; font-weight:500; color:var(--texto3); margin-top:3px; }
+    .col-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--borde); }
+    .stat-celda { padding:16px 10px; text-align:center; border-right:1px solid var(--borde); }
+    .stat-celda:last-child { border-right:none; }
+    .stat-num { font-family:'DM Serif Display',serif; font-size:1.7rem; color:var(--azul); }
+    .stat-txt { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--texto3); margin-top:3px; }
+    .cr-hdr { display:grid; grid-template-columns:24px 1fr 44px 44px 44px; gap:5px; padding:8px 16px 9px; background:var(--fondo-sec); border-bottom:1px solid var(--borde); }
+    .cr-hdr span { font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--texto3); text-align:center; }
+    .cr-hdr span:nth-child(2) { text-align:left; }
+    .cr-fila { display:grid; grid-template-columns:24px 1fr 44px 44px 44px; gap:5px; padding:13px 16px; border-bottom:1px solid var(--borde); min-height:60px; align-items:center; }
+    .cr-fila:last-child { border-bottom:none; }
+    .cr-fila.con-punto { background:var(--azul-suave); }
+    .cr-flag { font-size:1.05rem; }
+    .cr-nombre { font-size:0.88rem; font-weight:600; color:var(--texto); }
+    .cr-fecha { font-size:0.68rem; font-weight:500; color:var(--texto3); margin-top:2px; }
+    .cr-nota { font-size:0.64rem; font-weight:500; color:var(--texto3); margin-top:2px; line-height:1.3; font-style:italic; }
+    .cr-celda { font-size:0.92rem; font-weight:700; text-align:center; color:var(--texto2); }
+    .cr-celda.pts-si { color:var(--azul); }
+    .cr-celda.pts-no { color:var(--borde); }
+    .col-nota { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-bottom:1px solid var(--borde); font-size:0.82rem; font-weight:500; color:var(--texto2); line-height:1.5; }
+    .col-nota:last-child { border-bottom:none; }
+    .col-nota-icono { font-size:1rem; flex-shrink:0; margin-top:1px; }
+
+    /* LARGADA */
+    .largada-info { padding:15px 16px; background:var(--azul-suave); border-bottom:1px solid var(--azul-borde); }
+    .largada-info-titulo { font-size:0.95rem; font-weight:700; color:var(--azul); margin-bottom:5px; }
+    .largada-info-texto { font-size:0.82rem; font-weight:500; color:var(--texto2); line-height:1.6; }
+    .largada-pendiente { text-align:center; padding:36px 20px; }
+    .largada-emoji { font-size:3rem; margin-bottom:10px; }
+    .largada-gp { font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--texto); margin-bottom:6px; }
+    .largada-sub { font-size:0.85rem; font-weight:500; color:var(--texto3); }
+    .largada-fecha { display:inline-block; margin-top:14px; background:var(--rojo-suave); border:1.5px solid var(--rojo-borde); border-radius:10px; padding:9px 16px; font-size:0.85rem; font-weight:600; color:var(--rojo); }
+    .grid-fila { display:grid; grid-template-columns:40px 1fr 76px; gap:6px; padding:13px 16px; border-bottom:1px solid var(--borde); min-height:60px; align-items:center; }
+    .grid-fila:last-child { border-bottom:none; }
+    .grid-fila.pole { background:var(--dorado-suave); }
+    .grid-fila.es-arg { background:var(--azul-suave); }
+    .grid-pos { font-family:'DM Serif Display',serif; font-size:1.3rem; color:var(--texto3); }
+    .grid-fila.pole .grid-pos { color:var(--dorado); }
+    .grid-fila.es-arg .grid-pos { color:var(--azul); }
+    .grid-centro { display:flex; align-items:center; gap:10px; }
+    .grid-nombre { font-size:0.92rem; font-weight:600; color:var(--texto); }
+    .grid-equipo { font-size:0.68rem; font-weight:500; color:var(--texto3); margin-top:2px; display:flex; align-items:center; gap:4px; }
+    .grid-tiempo { font-size:0.78rem; font-weight:600; color:var(--texto3); text-align:right; }
+    .grid-fila.pole .grid-tiempo { color:var(--dorado); }
+
+    /* PODIOS */
+    .pod-cabecera { display:flex; align-items:center; gap:11px; padding:13px 16px; border-bottom:1px solid var(--borde); background:var(--fondo-sec); }
+    .pod-ronda { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--texto3); min-width:24px; }
+    .pod-bandera { font-size:1.35rem; }
+    .pod-nombre { font-family:'DM Serif Display',serif; font-size:0.95rem; color:var(--texto); }
+    .pod-fecha { font-size:0.7rem; font-weight:500; color:var(--texto3); margin-top:1px; }
+    .pod-fila { display:flex; align-items:center; gap:11px; padding:13px 16px; border-bottom:1px solid var(--borde); min-height:58px; }
+    .pod-fila:last-child { border-bottom:none; }
+    .pod-fila.oro    { background:var(--dorado-suave); }
+    .pod-fila.plata  { background:var(--fondo); }
+    .pod-fila.bronce { background:#FFF6F0; }
+    .pod-medalla { font-size:1.4rem; min-width:26px; text-align:center; }
+    .pod-flag { font-size:1.05rem; flex-shrink:0; }
+    .pod-piloto { flex:1; }
+    .pod-pnombre { font-size:0.92rem; font-weight:600; }
+    .pod-fila.oro .pod-pnombre { color:var(--dorado); }
+    .pod-pequipo { font-size:0.7rem; font-weight:500; color:var(--texto3); margin-top:2px; }
+    .pod-gap { font-size:0.76rem; font-weight:600; color:var(--texto3); text-align:right; white-space:nowrap; }
+    .pod-fila.oro .pod-gap { color:var(--dorado); }
+
+    /* CALENDARIO */
+    .cal-fila { display:flex; gap:11px; padding:13px 16px; border-bottom:1px solid var(--borde); min-height:60px; align-items:flex-start; }
+    .cal-fila:last-child { border-bottom:none; }
+    .cal-fila.hecho { opacity:0.4; }
+    .cal-fila.proxima { background:var(--rojo-suave); border-left:3px solid var(--rojo); }
+    .cal-ronda { font-size:0.62rem; font-weight:700; color:var(--texto3); min-width:24px; padding-top:3px; }
+    .cal-fila.proxima .cal-ronda { color:var(--rojo); }
+    .cal-bandera { font-size:1.25rem; min-width:22px; }
+    .cal-info { flex:1; }
+    .cal-nombre { font-size:0.9rem; font-weight:600; color:var(--texto); }
+    .cal-fila.proxima .cal-nombre { color:var(--rojo); }
+    .cal-lugar { font-size:0.72rem; font-weight:500; color:var(--texto3); margin-top:3px; }
+    .etiquetas { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+    .etiq { font-size:0.6rem; font-weight:700; letter-spacing:0.4px; padding:3px 8px; border-radius:20px; }
+    .etiq-hecho  { background:var(--fondo-sec); color:var(--texto3); }
+    .etiq-prox   { background:var(--rojo); color:#fff; }
+    .etiq-sprint { background:var(--dorado-suave); color:var(--dorado); border:1px solid var(--dorado-borde); }
+
+    /* FOOTER */
+    .fbar { position:fixed; bottom:0; left:0; right:0; max-width:520px; margin:0 auto; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-top:1px solid var(--borde); padding:9px 16px; display:flex; align-items:center; justify-content:space-between; font-size:0.68rem; font-weight:500; color:var(--texto3); box-shadow:0 -2px 12px rgba(0,0,0,0.07); z-index:200; }
+    .fbar a { color:var(--rojo); text-decoration:none; font-weight:700; font-size:0.72rem; }
+    .pie { font-size:0.66rem; font-weight:500; color:var(--texto3); text-align:center; padding:10px 0 4px; font-style:italic; }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-titulo">🏎️ Fórmula 1 — 2026</div>
+  <div class="hdr-sub"><span class="hdr-dot"></span><span id="hdr-estado">Conectando...</span></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active"  onclick="showTab('proxima')"><span class="tab-icono">🗓️</span>Próxima</div>
+  <div class="tab"         onclick="showTab('posiciones')"><span class="tab-icono">📊</span>Tabla</div>
+  <div class="tab tab-arg" onclick="showTab('colapinto')"><span class="tab-icono">🇦🇷</span>Franco</div>
+  <div class="tab"         onclick="showTab('largada')"><span class="tab-icono">🚦</span>Largada</div>
+  <div class="tab"         onclick="showTab('podios')"><span class="tab-icono">🏆</span>Podios</div>
+  <div class="tab"         onclick="showTab('calendario')"><span class="tab-icono">📅</span>Fechas</div>
+</div>
+
+<div id="proxima"    class="sec active"></div>
+<div id="posiciones" class="sec"></div>
+<div id="colapinto"  class="sec"></div>
+<div id="largada"    class="sec"></div>
+<div id="podios"     class="sec"></div>
+<div id="calendario" class="sec"></div>
+
+<div class="fbar">
+  <span id="fbar-txt">Cargando datos...</span>
+  <a href="https://www.formula1.com/en/racing/2026" target="_blank">F1 oficial →</a>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+var SPRINT_ROUNDS = {'2':1,'5':1,'9':1,'12':1,'16':1,'17':1,'21':1};
+var NAT = {
+  'antonelli':'🇮🇹','russell':'🇬🇧','leclerc':'🇲🇨','hamilton':'🇬🇧',
+  'norris':'🇬🇧','piastri':'🇦🇺','bearman':'🇬🇧','gasly':'🇫🇷',
+  'verstappen':'🇳🇱','lawson':'🇳🇿','ocon':'🇫🇷','sainz':'🇪🇸',
+  'alonso':'🇪🇸','stroll':'🇨🇦','hulkenberg':'🇩🇪','colapinto':'🇦🇷',
+  'hadjar':'🇫🇷','bortoleto':'🇧🇷','doohan':'🇦🇺','albon':'🇹🇭',
+  'tsunoda':'🇯🇵','magnussen':'🇩🇰'
+};
+var TEAM_COLORS = {
+  mercedes:'#00D2BE',ferrari:'#E8002D',mclaren:'#FF8000',
+  red_bull:'#3671C6',alpine:'#0093CC',haas:'#B6BABD',
+  racing_bulls:'#6692FF',aston_martin:'#358C75',
+  williams:'#64C4FF',sauber:'#52E252',kick_sauber:'#52E252'
+};
+var FLAGS = {
+  Australia:'🇦🇺',China:'🇨🇳',Japan:'🇯🇵','United States':'🇺🇸',
+  Canada:'🇨🇦',Monaco:'🇲🇨',Spain:'🇪🇸',Austria:'🇦🇹',
+  'United Kingdom':'🇬🇧',Belgium:'🇧🇪',Hungary:'🇭🇺',
+  Netherlands:'🇳🇱',Italy:'🇮🇹',Azerbaijan:'🇦🇿',
+  Singapore:'🇸🇬',Mexico:'🇲🇽',Brazil:'🇧🇷',Qatar:'🇶🇦',UAE:'🇦🇪'
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+var cdTimer = null;
+function el(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+function div(c){return el('div',c);}
+function txt(e,t){e.textContent=t;return e;}
+function app(p,c){p.appendChild(c);return c;}
+
+function flag(country){ return FLAGS[country]||'🏁'; }
+function nat(surname){
+  var k=(surname||'').toLowerCase();
+  for(var n in NAT){ if(k.indexOf(n)>=0) return NAT[n]; }
+  return '🏳️';
+}
+function teamColor(cid){
+  var s=(cid||'').toLowerCase().replace(/[-\s]/g,'_');
+  for(var k in TEAM_COLORS){ if(s.indexOf(k)>=0) return TEAM_COLORS[k]; }
+  return '#999';
+}
+function driverName(d){ return (d.givenName||'')+' '+(d.familyName||''); }
+function teamName(c){ return c&&c.name?c.name:c&&c.constructorId?c.constructorId:''; }
+
+function fmtFecha(iso){
+  try{
+    var d=new Date(iso);
+    var dia=d.toLocaleDateString('es-UY',{timeZone:'America/Montevideo',weekday:'long',day:'numeric',month:'long'});
+    var hr=d.toLocaleTimeString('es-UY',{timeZone:'America/Montevideo',hour:'2-digit',minute:'2-digit'});
+    dia=dia.charAt(0).toUpperCase()+dia.slice(1);
+    return dia+' a las '+hr+' hs';
+  }catch(e){return iso;}
+}
+
+function fmtFechaCorta(dateStr){
+  try{
+    var d=new Date(dateStr+'T12:00:00Z');
+    return d.toLocaleDateString('es-UY',{timeZone:'UTC',day:'numeric',month:'long'});
+  }catch(e){return dateStr;}
+}
+
+function pad(n){ return n<10?'0'+n:''+n; }
+
+function startCD(iso){
+  if(cdTimer)clearInterval(cdTimer);
+  function tick(){
+    var box=document.getElementById('cd-box');if(!box){clearInterval(cdTimer);return;}
+    var diff=new Date(iso)-new Date();
+    if(diff<=0){
+      box.innerHTML='<div class="cd-lbl">Faltan para la carrera</div><div style="font-family:DM Serif Display,serif;font-size:1.4rem;color:#fff;margin-top:8px">¡Hoy es la carrera!</div>';
+      clearInterval(cdTimer);return;
+    }
+    var d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000);
+    box.innerHTML=
+      '<div class="cd-lbl">Faltan para la carrera</div>'+
+      '<div class="cd-tabla">'+
+        '<div class="cd-celda"><div class="cd-num">'+d+'</div><div class="cd-unidad">Días</div></div>'+
+        '<div class="cd-celda"><div class="cd-num">'+pad(h)+'</div><div class="cd-unidad">Horas</div></div>'+
+        '<div class="cd-celda"><div class="cd-num">'+pad(m)+'</div><div class="cd-unidad">Minutos</div></div>'+
+      '</div>';
+  }
+  tick();cdTimer=setInterval(tick,30000);
+}
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  var order=['proxima','posiciones','colapinto','largada','podios','calendario'];
+  document.querySelectorAll('.tab')[order.indexOf(id)].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function spinEl(msg){
+  var w=div('loading');
+  app(w,div('loading-spin'));
+  txt(app(w,div('loading-txt')),msg||'Cargando...');
+  return w;
+}
+function errEl(msg,fn){
+  var b=div('error-box');
+  txt(app(b,div('error-txt')),msg||'No se pudo cargar. Verificá tu conexión.');
+  var btn=el('button','retry-btn');btn.textContent='Reintentar';btn.onclick=fn;app(b,btn);
+  return b;
+}
+
+// ─── API CALL ────────────────────────────────────────────────────────────────
+function apiFetch(tipo){
+  return fetch('/.netlify/functions/f1data?tipo='+tipo)
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+
+// ─── PRÓXIMA ─────────────────────────────────────────────────────────────────
+function loadProxima(){
+  var c=document.getElementById('proxima');
+  c.innerHTML=''; app(c,spinEl('Buscando próxima carrera...'));
+  apiFetch('next').then(function(data){
+    c.innerHTML='';
+    var race=data&&data.MRData&&data.MRData.RaceTable&&data.MRData.RaceTable.Races&&data.MRData.RaceTable.Races[0];
+    if(!race){txt(app(c,div()),'No hay próxima carrera.');return;}
+
+    var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
+    var locality=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.locality)||'';
+    var isSp=SPRINT_ROUNDS[race.round]||0;
+    var raceISO=race.date+'T'+(race.time||'00:00:00Z');
+    var qualISO=race.Qualifying?(race.Qualifying.date+'T'+(race.Qualifying.time||'00:00:00Z')):raceISO;
+
+    var card=app(c,div('card'));
+    var hero=app(card,div('hero'));
+    txt(app(hero,div('hero-flag')),flag(country));
+    txt(app(hero,div('hero-nombre')),race.raceName||'');
+    txt(app(hero,div('hero-sub')),locality+', '+country+' · Carrera '+race.round+(isSp?' · ⚡ Sprint':''));
+
+    var grid=app(hero,div('info-grid'));
+    function celda(l,v){var cc=div('info-cell');txt(app(cc,div('info-lbl')),l);txt(app(cc,div('info-val')),v);return cc;}
+    app(grid,celda('Circuito',(race.Circuit&&race.Circuit.circuitName)||'—'));
+    app(grid,celda('Carrera',fmtFechaCorta(race.date)));
+
+    var cd=app(hero,div('cd-box'));cd.id='cd-box';
+
+    // Horarios
+    var sessions=[];
+    if(isSp){
+      if(race.FirstPractice)sessions.push({n:'Práctica libre',iso:race.FirstPractice.date+'T'+(race.FirstPractice.time||'00:00:00Z')});
+      if(race.SprintQualifying)sessions.push({n:'Clasificación Sprint',iso:race.SprintQualifying.date+'T'+(race.SprintQualifying.time||'00:00:00Z')});
+      if(race.Sprint)sessions.push({n:'Carrera Sprint',iso:race.Sprint.date+'T'+(race.Sprint.time||'00:00:00Z')});
+      if(race.Qualifying)sessions.push({n:'Clasificación',iso:race.Qualifying.date+'T'+(race.Qualifying.time||'00:00:00Z')});
+    } else {
+      if(race.FirstPractice)sessions.push({n:'Práctica 1',iso:race.FirstPractice.date+'T'+(race.FirstPractice.time||'00:00:00Z')});
+      if(race.SecondPractice)sessions.push({n:'Práctica 2',iso:race.SecondPractice.date+'T'+(race.SecondPractice.time||'00:00:00Z')});
+      if(race.ThirdPractice)sessions.push({n:'Práctica 3',iso:race.ThirdPractice.date+'T'+(race.ThirdPractice.time||'00:00:00Z')});
+      if(race.Qualifying)sessions.push({n:'Clasificación',iso:race.Qualifying.date+'T'+(race.Qualifying.time||'00:00:00Z')});
+    }
+
+    var lbl=app(c,txt(div('sec-lbl'),'Horarios · Hora Uruguay'));lbl.style.marginTop='14px';
+    var hcard=app(c,div('card'));
+    sessions.forEach(function(s){
+      var row=app(hcard,div('horario-row'));
+      var left=app(row,div());
+      txt(app(left,div('horario-nombre')),s.n);
+      txt(app(left,div('horario-cuando')),fmtFecha(s.iso));
+    });
+    var rr=app(hcard,div('horario-row principal'));
+    var rl=app(rr,div());
+    txt(app(rl,div('horario-nombre')),'🏁 Carrera principal');
+    txt(app(rl,div('horario-cuando')),fmtFecha(raceISO));
+
+    txt(app(c,div('pie')),'Horarios en UTC-3 (Montevideo)');
+    startCD(raceISO);
+  }).catch(function(){c.innerHTML='';app(c,errEl('No se pudo cargar la próxima carrera.',loadProxima));});
+}
+
+// ─── POSICIONES ──────────────────────────────────────────────────────────────
+function loadPosiciones(){
+  var c=document.getElementById('posiciones');
+  c.innerHTML='';app(c,spinEl('Cargando tabla de puntos...'));
+  Promise.all([apiFetch('drivers'),apiFetch('constructors')]).then(function(res){
+    c.innerHTML='';
+    var dsList=res[0]&&res[0].MRData&&res[0].MRData.StandingsTable&&res[0].MRData.StandingsTable.StandingsLists&&res[0].MRData.StandingsTable.StandingsLists[0];
+    var csList=res[1]&&res[1].MRData&&res[1].MRData.StandingsTable&&res[1].MRData.StandingsTable.StandingsLists&&res[1].MRData.StandingsTable.StandingsLists[0];
+    var dArr=(dsList&&dsList.DriverStandings)||[];
+    var cArr=(csList&&csList.ConstructorStandings)||[];
+    var round=(dsList&&dsList.round)||'?';
+
+    app(c,txt(div('sec-lbl'),'Pilotos · Tras ronda '+round));
+    var card1=app(c,div('card'));
+    var h1=app(card1,div('std-hdr'));h1.innerHTML='<span>Pos.</span><span>Piloto</span><span style="text-align:right">Pts</span>';
+    dArr.forEach(function(s,i){
+      var row=app(card1,div('std-fila'+(i===0?' lider':'')));
+      txt(app(row,div('std-pos')),s.position+'º');
+      var centro=app(row,div('std-centro'));
+      txt(app(centro,div('drv-flag')),nat(s.Driver&&s.Driver.familyName||''));
+      var info=app(centro,div());
+      txt(app(info,div('std-nombre')),driverName(s.Driver));
+      var tm=app(info,div('std-equipo'));
+      var dot=app(tm,div('dot'));dot.style.background=teamColor(s.Constructors&&s.Constructors[0]&&s.Constructors[0].constructorId||'');
+      tm.appendChild(document.createTextNode(teamName(s.Constructors&&s.Constructors[0])));
+      txt(app(row,div('std-pts')),s.points);
+    });
+
+    var lbl2=app(c,txt(div('sec-lbl'),'Equipos'));lbl2.style.marginTop='16px';
+    var card2=app(c,div('card'));
+    var h2=app(card2,div('std-hdr'));h2.innerHTML='<span>Pos.</span><span>Equipo</span><span style="text-align:right">Pts</span>';
+    cArr.forEach(function(s,i){
+      var row=app(card2,div('std-fila'+(i===0?' lider':'')));
+      txt(app(row,div('std-pos')),s.position+'º');
+      var centro=app(row,div('std-centro'));
+      var dot=div('dot');dot.style.background=teamColor(s.Constructor&&s.Constructor.constructorId||'');dot.style.width='10px';dot.style.height='10px';app(centro,dot);
+      var info=app(centro,div());
+      txt(app(info,div('std-nombre')),teamName(s.Constructor));
+      txt(app(info,div('std-equipo')),s.wins+' victorias');
+      txt(app(row,div('std-pts')),s.points);
+    });
+  }).catch(function(){c.innerHTML='';app(c,errEl('No se pudo cargar la tabla.',loadPosiciones));});
+}
+
+// ─── COLAPINTO ───────────────────────────────────────────────────────────────
+function loadColapinto(){
+  var c=document.getElementById('colapinto');
+  c.innerHTML='';app(c,spinEl('Cargando datos de Colapinto...'));
+  apiFetch('results').then(function(data){
+    c.innerHTML='';
+    var races=(data&&data.MRData&&data.MRData.RaceTable&&data.MRData.RaceTable.Races)||[];
+    var colRaces=[];var totalPts=0;var mejorPos=99;
+
+    races.forEach(function(race){
+      (race.Results||[]).forEach(function(r){
+        if((r.Driver&&r.Driver.familyName||'').toLowerCase()==='colapinto'){
+          var pts=parseInt(r.points||0);
+          var pos=parseInt(r.position||99);
+          totalPts+=pts;
+          if(pos<mejorPos)mejorPos=pos;
+          colRaces.push({race:race,result:r});
+        }
+      });
+    });
+
+    var card1=app(c,div('card'));
+    var perf=app(card1,div('col-perfil'));
+    txt(app(perf,div('col-avatar')),'🇦🇷');
+    var info=app(perf,div());
+    txt(app(info,div('col-nombre')),'Franco Colapinto');
+    txt(app(info,div('col-sub')),'Equipo Alpine · Número 43 · Argentina · 22 años');
+
+    var stats=app(card1,div('col-stats'));
+    function stat(v,l){var ce=div('stat-celda');txt(app(ce,div('stat-num')),v);txt(app(ce,div('stat-txt')),l);return ce;}
+    app(stats,stat(colRaces.length,'Carreras'));
+    app(stats,stat(totalPts,'Puntos'));
+    app(stats,stat(mejorPos<99?'P'+mejorPos:'—','Mejor pos.'));
+
+    app(c,txt(div('sec-lbl'),'Carrera a carrera')).style.marginTop='14px';
+    var card2=app(c,div('card'));
+    var hdr=app(card2,div('cr-hdr'));
+    hdr.innerHTML='<span></span><span>Carrera</span><span>Quali</span><span>Llegó</span><span>Pts</span>';
+
+    colRaces.forEach(function(item){
+      var race=item.race,r=item.result;
+      var pts=parseInt(r.points||0);
+      var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
+      var row=app(card2,div('cr-fila'+(pts>0?' con-punto':'')));
+      txt(app(row,div('cr-flag')),flag(country));
+      var inf=app(row,div());
+      txt(app(inf,div('cr-nombre')),race.raceName);
+      txt(app(inf,div('cr-fecha')),fmtFechaCorta(race.date));
+      txt(app(row,div('cr-celda')),r.grid?'P'+r.grid:'—');
+      txt(app(row,div('cr-celda')),'P'+r.position);
+      var ptsCls='cr-celda '+(pts>0?'pts-si':'pts-no');
+      txt(app(row,div(ptsCls)),pts>0?'+'+pts+'pt':'—');
+    });
+
+    // Datos fijos de contexto
+    var notas=[
+      {i:'⭐',t:'Primer punto con Alpine en China (15 de marzo)'},
+      {i:'📍',t:'Mejor clasificación de 2026: P12 en China'},
+      {i:'🇦🇷',t:'Único piloto sudamericano en la grilla 2026'},
+      {i:'🤝',t:'Compañero Pierre Gasly le ganó en las 3 clasificaciones'}
+    ];
+    app(c,txt(div('sec-lbl'),'Datos y contexto')).style.marginTop='14px';
+    var card3=app(c,div('card'));
+    notas.forEach(function(n){
+      var fila=app(card3,div('col-nota'));
+      txt(app(fila,div('col-nota-icono')),n.i);
+      fila.appendChild(document.createTextNode(n.t));
+    });
+  }).catch(function(){c.innerHTML='';app(c,errEl('No se pudo cargar datos de Colapinto.',loadColapinto));});
+}
+
+// ─── LARGADA ─────────────────────────────────────────────────────────────────
+function loadLargada(){
+  var c=document.getElementById('largada');
+  c.innerHTML='';app(c,spinEl('Cargando grilla de largada...'));
+
+  var card=app(c,div('card'));
+  var info=app(card,div('largada-info'));
+  txt(app(info,div('largada-info-titulo')),'¿Qué es la grilla de largada?');
+  txt(app(info,div('largada-info-texto')),'El sábado se hace la clasificación. Quien hace el mejor tiempo sale primero el domingo. Esta pantalla muestra esas posiciones.');
+
+  apiFetch('grid').then(function(data){
+    var results=data&&data.MRData&&data.MRData.RaceTable&&data.MRData.RaceTable.Races&&data.MRData.RaceTable.Races[0];
+    if(!results||!results.QualifyingResults||!results.QualifyingResults.length){
+      var pend=app(card,div('largada-pendiente'));
+      txt(app(pend,div('largada-emoji')),'🚦');
+      txt(app(pend,div('largada-gp')),'Clasificación pendiente');
+      txt(app(pend,div('largada-sub')),'Todavía no se corrió la clasificación del sábado.');
+      return;
+    }
+    var raceName=(results.raceName)||'Clasificación';
+    app(c,txt(div('sec-lbl'),raceName+' — Grilla')).style.marginTop='14px';
+    var gcard=app(c,div('card'));
+    results.QualifyingResults.forEach(function(r){
+      var isPole=r.position==='1';
+      var isArg=(r.Driver&&r.Driver.familyName||'').toLowerCase()==='colapinto';
+      var row=app(gcard,div('grid-fila'+(isPole?' pole':isArg?' es-arg':'')));
+      txt(app(row,div('grid-pos')),r.position+'º');
+      var centro=app(row,div('grid-centro'));
+      txt(app(centro,div('drv-flag')),nat(r.Driver&&r.Driver.familyName||''));
+      var inf=app(centro,div());
+      txt(app(inf,div('grid-nombre')),driverName(r.Driver));
+      var eq=app(inf,div('grid-equipo'));
+      var dot=div('dot');dot.style.background=teamColor(r.Constructor&&r.Constructor.constructorId||'');app(eq,dot);
+      eq.appendChild(document.createTextNode(' '+teamName(r.Constructor)));
+      var bestTime=r.Q3||r.Q2||r.Q1||'';
+      txt(app(row,div('grid-tiempo')),bestTime);
+    });
+    txt(app(c,div('pie')),'Tiempos del mejor intento de clasificación');
+  }).catch(function(){
+    var pend=app(card,div('largada-pendiente'));
+    txt(app(pend,div('largada-emoji')),'🚦');
+    txt(app(pend,div('largada-gp')),'Clasificación pendiente');
+    txt(app(pend,div('largada-sub')),'Todavía no se corrió la clasificación del sábado.');
+  });
+}
+
+// ─── PODIOS ──────────────────────────────────────────────────────────────────
+function loadPodios(){
+  var c=document.getElementById('podios');
+  c.innerHTML='';app(c,spinEl('Cargando podios...'));
+  apiFetch('results').then(function(data){
+    c.innerHTML='';
+    var races=(data&&data.MRData&&data.MRData.RaceTable&&data.MRData.RaceTable.Races)||[];
+    if(!races.length){txt(app(c,div()),'La temporada aún no comenzó.');return;}
+    app(c,txt(div('sec-lbl'),'Podios de la temporada'));
+    var rev=[].concat(races).reverse();
+    rev.forEach(function(race){
+      var top3=(race.Results||[]).filter(function(r){return parseInt(r.position)<=3;}).sort(function(a,b){return parseInt(a.position)-parseInt(b.position);});
+      var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
+      var isSp=SPRINT_ROUNDS[race.round]||0;
+      var card=app(c,div('card'));
+      var cab=app(card,div('pod-cabecera'));
+      txt(app(cab,div('pod-ronda')),'Ronda '+race.round);
+      txt(app(cab,div('pod-bandera')),flag(country));
+      var inf=app(cab,div());
+      txt(app(inf,div('pod-nombre')),race.raceName||'');
+      txt(app(inf,div('pod-fecha')),fmtFechaCorta(race.date)+(isSp?' · ⚡ Sprint':''));
+      var clases=['oro','plata','bronce'],medals=['🥇','🥈','🥉'];
+      top3.forEach(function(r,i){
+        var fila=app(card,div('pod-fila '+clases[i]));
+        txt(app(fila,div('pod-medalla')),medals[i]);
+        txt(app(fila,div('pod-flag')),nat(r.Driver&&r.Driver.familyName||''));
+        var pil=app(fila,div('pod-piloto'));
+        txt(app(pil,div('pod-pnombre')),driverName(r.Driver));
+        txt(app(pil,div('pod-pequipo')),teamName(r.Constructor));
+        var gap=i===0?'Ganador':(r.Time&&r.Time.time?'+'+r.Time.time:(r.status||'—'));
+        txt(app(fila,div('pod-gap')),gap);
+      });
+    });
+    txt(app(c,div('pie')),'Más reciente primero');
+  }).catch(function(){c.innerHTML='';app(c,errEl('No se pudo cargar los podios.',loadPodios));});
+}
+
+// ─── CALENDARIO ──────────────────────────────────────────────────────────────
+function loadCalendario(){
+  var c=document.getElementById('calendario');
+  c.innerHTML='';app(c,spinEl('Cargando calendario...'));
+  Promise.all([apiFetch('schedule'),apiFetch('results')]).then(function(res){
+    c.innerHTML='';
+    var all=(res[0]&&res[0].MRData&&res[0].MRData.RaceTable&&res[0].MRData.RaceTable.Races)||[];
+    var doneMap={};
+    ((res[1]&&res[1].MRData&&res[1].MRData.RaceTable&&res[1].MRData.RaceTable.Races)||[]).forEach(function(r){doneMap[r.round]=1;});
+    var today=new Date();var nextFound=false;
+    app(c,txt(div('sec-lbl'),'Temporada 2026 · '+all.length+' carreras'));
+    var card=app(c,div('card'));
+    all.forEach(function(race){
+      var rDate=new Date(race.date+'T'+(race.time||'12:00:00Z'));
+      var isDone=doneMap[race.round]||0;
+      var isNext=!isDone&&!nextFound&&rDate>today;
+      if(isNext)nextFound=true;
+      var isSp=SPRINT_ROUNDS[race.round]||0;
+      var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
+      var locality=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.locality)||'';
+      var cls='cal-fila'+(isDone?' hecho':isNext?' proxima':'');
+      var fila=app(card,div(cls));
+      txt(app(fila,div('cal-ronda')),'R'+race.round);
+      txt(app(fila,div('cal-bandera')),flag(country));
+      var info=app(fila,div('cal-info'));
+      txt(app(info,div('cal-nombre')),race.raceName||'');
+      txt(app(info,div('cal-lugar')),locality+' · '+fmtFechaCorta(race.date));
+      var etqs=app(info,div('etiquetas'));
+      if(isDone){txt(app(etqs,div('etiq etiq-hecho')),'Finalizada');}
+      if(isNext){txt(app(etqs,div('etiq etiq-prox')),'Próxima');}
+      if(isSp){txt(app(etqs,div('etiq etiq-sprint')),'Sprint');}
+    });
+    txt(app(c,div('pie')),'Sprint = fin de semana con carrera corta extra el sábado');
+  }).catch(function(){c.innerHTML='';app(c,errEl('No se pudo cargar el calendario.',loadCalendario));});
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function init(){
+  // Sticky dinámico
+  var hdr=document.querySelector('.hdr');
+  var tabs=document.getElementById('tabs');
+  function adjustSticky(){ tabs.style.top=hdr.offsetHeight+'px'; }
+  adjustSticky();window.addEventListener('resize',adjustSticky);
+
+  // Cargar todas las secciones
+  loadProxima();
+  loadPosiciones();
+  loadColapinto();
+  loadLargada();
+  loadPodios();
+  loadCalendario();
+
+  // Actualizar estado del header
+  var now=new Date().toLocaleString('es-UY',{timeZone:'America/Montevideo',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('hdr-estado').textContent='Datos en vivo · '+now;
+  document.getElementById('fbar-txt').textContent='Actualizado '+now;
+}
+
+init();
+</script>
+</body>
+</html>
