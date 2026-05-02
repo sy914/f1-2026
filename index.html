@@ -663,7 +663,7 @@ function loadLargada(){
 function loadPodios(){
   var c=document.getElementById('podios');
   c.innerHTML='';app(c,spinEl('Cargando podios...'));
-  apiFetch('results').then(function(data){
+  apiFetch('podios').then(function(data){
     c.innerHTML='';
     var races=(data&&data.MRData&&data.MRData.RaceTable&&data.MRData.RaceTable.Races)||[];
     if(!races.length){txt(app(c,div()),'La temporada aún no comenzó.');return;}
@@ -671,8 +671,10 @@ function loadPodios(){
     var rev=[].concat(races).reverse();
     rev.forEach(function(race){
       var top3=(race.Results||[]).filter(function(r){return parseInt(r.position)<=3;}).sort(function(a,b){return parseInt(a.position)-parseInt(b.position);});
+      if(!top3.length) return;
       var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
       var isSp=!!(race.Sprint||race.SprintQualifying||race.SQualifying);
+      var card=app(c,div('card'));
       var cab=app(card,div('pod-cabecera'));
       txt(app(cab,div('pod-ronda')),'Ronda '+race.round);
       txt(app(cab,div('pod-bandera')),flag(country));
