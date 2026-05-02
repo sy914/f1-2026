@@ -137,10 +137,22 @@
     .horario-row { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--borde); min-height:58px; gap:10px; }
     .horario-row:last-child { border-bottom:none; }
     .horario-row.principal { background:var(--rojo-suave); border-left:3px solid var(--rojo); }
+    .horario-row.pasada { opacity:0.45; }
+    .horario-row.en-curso { background:#EFFFEF; border-left:3px solid #006600; }
+    .horario-row.siguiente { background:#FFFBEE; border-left:3px solid var(--dorado); }
     .horario-nombre { font-size:0.95rem; font-weight:600; color:var(--texto); }
     .horario-row.principal .horario-nombre { color:var(--rojo); font-weight:700; }
+    .horario-row.en-curso .horario-nombre { color:#006600; font-weight:700; }
+    .horario-row.siguiente .horario-nombre { color:var(--dorado); font-weight:700; }
     .horario-cuando { font-size:0.78rem; color:var(--texto3); font-weight:500; margin-top:2px; }
     .horario-row.principal .horario-cuando { color:var(--rojo); opacity:.8; }
+    .horario-row.en-curso .horario-cuando { color:#006600; opacity:.8; }
+    .horario-row.siguiente .horario-cuando { color:var(--dorado); }
+    .horario-badge { font-size:0.62rem; font-weight:800; padding:2px 8px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
+    .badge-pasada  { background:#EBEBEB; color:#888; }
+    .badge-curso   { background:#006600; color:#fff; }
+    .badge-siguiente { background:var(--dorado); color:#fff; }
+    .badge-pronto  { background:var(--rojo); color:#fff; }
 
     /* STANDINGS */
     .std-hdr { display:grid; grid-template-columns:40px 1fr 54px; gap:6px; padding:8px 16px 9px; background:var(--fondo-sec); border-bottom:1px solid var(--borde); }
@@ -329,7 +341,7 @@ function fmtFecha(iso){
   try{
     var d=new Date(iso);
     var dia=d.toLocaleDateString('es-UY',{timeZone:'America/Montevideo',weekday:'long',day:'numeric',month:'long'});
-    var hr=d.toLocaleTimeString('es-UY',{timeZone:'America/Montevideo',hour:'2-digit',minute:'2-digit'});
+    var hr=d.toLocaleTimeString('es-UY',{timeZone:'America/Montevideo',hour:'2-digit',minute:'2-digit',hour12:false});
     dia=dia.charAt(0).toUpperCase()+dia.slice(1);
     return dia+' a las '+hr+' hs';
   }catch(e){return iso;}
@@ -437,16 +449,43 @@ function loadProxima(){
 
     var lbl=app(c,txt(div('sec-lbl'),'Horarios · Hora Uruguay'));lbl.style.marginTop='14px';
     var hcard=app(c,div('card'));
-    sessions.forEach(function(s){
-      var row=app(hcard,div('horario-row'));
+    var ahora=new Date();
+    var todasSesiones=sessions.concat([{n:'🏁 Carrera principal',iso:raceISO,esPrincipal:true}]);
+    var siguienteEncontrado=false;
+
+    todasSesiones.forEach(function(s){
+      var inicio=new Date(s.iso);
+      var duracion=s.esPrincipal?120:60; // minutos estimados de duración
+      var fin=new Date(inicio.getTime()+duracion*60000);
+      var yaTermino=ahora>fin;
+      var enCurso=ahora>=inicio&&ahora<=fin;
+      var esSiguiente=!yaTermino&&!enCurso&&!siguienteEncontrado;
+      if(esSiguiente)siguienteEncontrado=true;
+
+      var cls='horario-row';
+      var badge='';
+      if(s.esPrincipal){
+        cls+=' principal';
+      } else if(yaTermino){
+        cls+=' pasada';
+        badge='Finalizada';
+      } else if(enCurso){
+        cls+=' en-curso';
+        badge='En curso ●';
+      } else if(esSiguiente){
+        cls+=' siguiente';
+        badge='Próxima';
+      }
+
+      var row=app(hcard,div(cls));
       var left=app(row,div());
       txt(app(left,div('horario-nombre')),s.n);
       txt(app(left,div('horario-cuando')),fmtFecha(s.iso));
+      if(badge){
+        var badgeCls='horario-badge '+(yaTermino?'badge-pasada':enCurso?'badge-curso':esSiguiente?'badge-siguiente':'');
+        txt(app(row,div(badgeCls)),badge);
+      }
     });
-    var rr=app(hcard,div('horario-row principal'));
-    var rl=app(rr,div());
-    txt(app(rl,div('horario-nombre')),'🏁 Carrera principal');
-    txt(app(rl,div('horario-cuando')),fmtFecha(raceISO));
 
     txt(app(c,div('pie')),'Horarios en UTC-3 (Montevideo)');
     startCD(raceISO);
@@ -501,20 +540,18 @@ function loadPosiciones(){
 function loadColapinto(){
   var c=document.getElementById('colapinto');
   c.innerHTML='';app(c,spinEl('Cargando datos de Colapinto...'));
-  apiFetch('results').then(function(data){
+  apiFetch('colapinto').then(function(data){
     c.innerHTML='';
     var races=(data&&data.MRData&&data.MRData.RaceTable&&data.MRData.RaceTable.Races)||[];
     var colRaces=[];var totalPts=0;var mejorPos=99;
 
     races.forEach(function(race){
       (race.Results||[]).forEach(function(r){
-        if((r.Driver&&r.Driver.familyName||'').toLowerCase()==='colapinto'){
-          var pts=parseInt(r.points||0);
-          var pos=parseInt(r.position||99);
-          totalPts+=pts;
-          if(pos<mejorPos)mejorPos=pos;
-          colRaces.push({race:race,result:r});
-        }
+        var pts=parseInt(r.points||0);
+        var pos=parseInt(r.position||99);
+        totalPts+=pts;
+        if(pos<mejorPos)mejorPos=pos;
+        colRaces.push({race:race,result:r});
       });
     });
 
@@ -536,6 +573,10 @@ function loadColapinto(){
     var hdr=app(card2,div('cr-hdr'));
     hdr.innerHTML='<span></span><span>Carrera</span><span>Quali</span><span>Llegó</span><span>Pts</span>';
 
+    if(!colRaces.length){
+      txt(app(card2,div('cr-fila')),'No hay resultados aún.');
+    }
+
     colRaces.forEach(function(item){
       var race=item.race,r=item.result;
       var pts=parseInt(r.points||0);
@@ -551,7 +592,6 @@ function loadColapinto(){
       txt(app(row,div(ptsCls)),pts>0?'+'+pts+'pt':'—');
     });
 
-    // Datos fijos de contexto
     var notas=[
       {i:'⭐',t:'Primer punto con Alpine en China (15 de marzo)'},
       {i:'📍',t:'Mejor clasificación de 2026: P12 en China'},
