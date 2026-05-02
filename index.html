@@ -293,7 +293,6 @@
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-var SPRINT_ROUNDS = {'2':1,'5':1,'9':1,'12':1,'16':1,'17':1,'21':1};
 var NAT = {
   'antonelli':'🇮🇹','russell':'🇬🇧','leclerc':'🇲🇨','hamilton':'🇬🇧',
   'norris':'🇬🇧','piastri':'🇦🇺','bearman':'🇬🇧','gasly':'🇫🇷',
@@ -416,7 +415,8 @@ function loadProxima(){
 
     var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
     var locality=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.locality)||'';
-    var isSp=SPRINT_ROUNDS[race.round]||0;
+    // Detectar sprint dinámicamente mirando los campos del objeto de la API
+    var isSp=!!(race.Sprint||race.SprintQualifying||race.SQualifying);
     var raceISO=race.date+'T'+(race.time||'00:00:00Z');
     var qualISO=race.Qualifying?(race.Qualifying.date+'T'+(race.Qualifying.time||'00:00:00Z')):raceISO;
 
@@ -437,8 +437,10 @@ function loadProxima(){
     var sessions=[];
     if(isSp){
       if(race.FirstPractice)sessions.push({n:'Práctica libre',iso:race.FirstPractice.date+'T'+(race.FirstPractice.time||'00:00:00Z')});
-      if(race.SprintQualifying)sessions.push({n:'Clasificación Sprint',iso:race.SprintQualifying.date+'T'+(race.SprintQualifying.time||'00:00:00Z')});
-      if(race.Sprint)sessions.push({n:'Carrera Sprint',iso:race.Sprint.date+'T'+(race.Sprint.time||'00:00:00Z')});
+      // Jolpica puede devolver SprintQualifying o SQualifying
+      var squal=race.SprintQualifying||race.SQualifying;
+      if(squal)sessions.push({n:'Clasificación Sprint',iso:squal.date+'T'+(squal.time||'00:00:00Z')});
+      if(race.Sprint)sessions.push({n:'⚡ Carrera Sprint',iso:race.Sprint.date+'T'+(race.Sprint.time||'00:00:00Z')});
       if(race.Qualifying)sessions.push({n:'Clasificación',iso:race.Qualifying.date+'T'+(race.Qualifying.time||'00:00:00Z')});
     } else {
       if(race.FirstPractice)sessions.push({n:'Práctica 1',iso:race.FirstPractice.date+'T'+(race.FirstPractice.time||'00:00:00Z')});
@@ -452,11 +454,14 @@ function loadProxima(){
     var ahora=new Date();
     var todasSesiones=sessions.concat([{n:'🏁 Carrera principal',iso:raceISO,esPrincipal:true}]);
     var siguienteEncontrado=false;
+    // Duraciones estimadas por tipo de sesión (en minutos)
+    var duraciones={'Práctica libre':60,'Práctica 1':60,'Práctica 2':60,'Práctica 3':60,
+      'Clasificación Sprint':30,'Carrera Sprint':30,'Clasificación':60,'🏁 Carrera principal':120};
 
     todasSesiones.forEach(function(s){
       var inicio=new Date(s.iso);
-      var duracion=s.esPrincipal?120:60; // minutos estimados de duración
-      var fin=new Date(inicio.getTime()+duracion*60000);
+      var mins=duraciones[s.n]||60;
+      var fin=new Date(inicio.getTime()+mins*60000);
       var yaTermino=ahora>fin;
       var enCurso=ahora>=inicio&&ahora<=fin;
       var esSiguiente=!yaTermino&&!enCurso&&!siguienteEncontrado;
@@ -611,7 +616,7 @@ function loadColapinto(){
 // ─── LARGADA ─────────────────────────────────────────────────────────────────
 function loadLargada(){
   var c=document.getElementById('largada');
-  c.innerHTML='';app(c,spinEl('Cargando grilla de largada...'));
+  c.innerHTML='';
 
   var card=app(c,div('card'));
   var info=app(card,div('largada-info'));
@@ -624,7 +629,7 @@ function loadLargada(){
       var pend=app(card,div('largada-pendiente'));
       txt(app(pend,div('largada-emoji')),'🚦');
       txt(app(pend,div('largada-gp')),'Clasificación pendiente');
-      txt(app(pend,div('largada-sub')),'Todavía no se corrió la clasificación del sábado.');
+      txt(app(pend,div('largada-sub')),'Todavía no se corrió la clasificación. Volvé después del sábado a la noche.');
       return;
     }
     var raceName=(results.raceName)||'Clasificación';
@@ -667,8 +672,7 @@ function loadPodios(){
     rev.forEach(function(race){
       var top3=(race.Results||[]).filter(function(r){return parseInt(r.position)<=3;}).sort(function(a,b){return parseInt(a.position)-parseInt(b.position);});
       var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
-      var isSp=SPRINT_ROUNDS[race.round]||0;
-      var card=app(c,div('card'));
+      var isSp=!!(race.Sprint||race.SprintQualifying||race.SQualifying);
       var cab=app(card,div('pod-cabecera'));
       txt(app(cab,div('pod-ronda')),'Ronda '+race.round);
       txt(app(cab,div('pod-bandera')),flag(country));
@@ -708,7 +712,7 @@ function loadCalendario(){
       var isDone=doneMap[race.round]||0;
       var isNext=!isDone&&!nextFound&&rDate>today;
       if(isNext)nextFound=true;
-      var isSp=SPRINT_ROUNDS[race.round]||0;
+      var isSp=!!(race.Sprint||race.SprintQualifying||race.SQualifying);
       var country=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.country)||'';
       var locality=(race.Circuit&&race.Circuit.Location&&race.Circuit.Location.locality)||'';
       var cls='cal-fila'+(isDone?' hecho':isNext?' proxima':'');
